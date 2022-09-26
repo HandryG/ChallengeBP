@@ -19,16 +19,21 @@ namespace ChallengeBP.Controllers
             _userRepository = userRepository;
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> list(){
 
-            return Ok(await _userRepository.getUsers());
-        }
-
-        [HttpGet("[action]")]
+        [HttpGet("{id}")]
         public IActionResult Get(int id) {
 
             return Ok(_userRepository.getUserById(id));
+        }
+
+        public IActionResult GetResumen(int id)
+        {
+            return Ok(_userRepository.getResumenById(id));
+        }
+
+        public IActionResult GetResumenDate(int id, DateTime date)
+        {
+            return Ok(_userRepository.getResumenByIdAndDate(id, date));
         }
     }
 }

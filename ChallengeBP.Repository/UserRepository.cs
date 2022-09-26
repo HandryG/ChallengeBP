@@ -105,7 +105,7 @@ namespace ChallengeBP.Repository
             {
                 var listaAportes = from goal in db.Goals
                                    join goaltransaction in db.Goaltransactions on goal.Id equals goaltransaction.Id
-                                   where goal.Userid == userid
+                                   where goal.Userid == userid && goaltransaction.Date.Equals(date)
                                    select new
                                    {
                                        monto = goaltransaction.Amount,
@@ -125,7 +125,7 @@ namespace ChallengeBP.Repository
 
                 var balance = from goal in db.Goals
                               join goaltransactionfunding in db.Goaltransactionfundings on goal.Id equals goaltransactionfunding.Id
-                              where goal.Userid == userid
+                              where goal.Userid == userid && goaltransactionfunding.Date.Equals(date)
                               select new
                               {
                                   monto = (from fundingsharevalue in db.Fundingsharevalues

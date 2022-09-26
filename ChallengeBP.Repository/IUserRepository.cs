@@ -12,5 +12,8 @@ namespace ChallengeBP.Repository
     {
         Task<IEnumerable<User>> getUsers();
         UserViewModel getUserById(int userid);
+        ResumenViewModel getResumenById(int userid);
+        ResumenViewModel getResumenByIdAndDate(int userid, DateTime date);
+
     }
 }
