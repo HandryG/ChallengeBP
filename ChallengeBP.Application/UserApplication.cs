@@ -147,7 +147,7 @@ namespace ChallengeBP.Application
             //Asignacion de Valores faltantes
             metaDetalleViewModel.TotalAportes = totalaportes;
             metaDetalleViewModel.TotalRetiros = totalretiros;
-            metaDetalleViewModel.PorcenajeCumplimiento = totalaportes / metaViewModel.MontoObjetivo;
+            metaDetalleViewModel.PorcenajeCumplimiento = balancetotal / metaViewModel.MontoObjetivo;
 
             return metaDetalleViewModel;
         }
