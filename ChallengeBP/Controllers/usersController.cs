@@ -1,8 +1,8 @@
-﻿using ChallengeBP.DataAccess;
-using ChallengeBP.Repository;
+﻿using ChallengeBP.Application;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace ChallengeBP.Controllers
 {
@@ -10,44 +10,50 @@ namespace ChallengeBP.Controllers
     [ApiController]
     public class usersController : ControllerBase
     {
-        private readonly challengeContext _context;
-        private readonly IUserRepository _userRepository;
+        private readonly IUserApplication _userApplication;
 
-        public usersController(challengeContext context, IUserRepository userRepository)
+        public usersController(IUserApplication userApplication)
         {
-            _context = context;
-            _userRepository = userRepository;
+            _userApplication = userApplication;
         }
 
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id) {
+        public async Task<IActionResult> Get(int id) {
 
-            return Ok(_userRepository.getUserById(id));
+            return Ok(await _userApplication.GetUserById(id));
         }
 
         [HttpGet("{id}/summary")]
-        public IActionResult GetResumen(int id)
+        public async Task<IActionResult> GetResumen(int id)
         {
-            return Ok(_userRepository.getResumenById(id));
+            return Ok(await _userApplication.GetResumenById(id));
         }
 
-        [HttpGet("{id}/summary/{dd-mm-yyyy}")]
-        public IActionResult GetResumenDate(int id, DateTime date)
+        [HttpGet("{id}/summary/{date}")]
+        public async Task<IActionResult> GetResumenDate(int id, string date)
         {
-            return Ok(_userRepository.getResumenByIdAndDate(id, date));
+
+            if (Regex.IsMatch(date, "\\d{2}-\\d{2}-\\d{4}"))
+            {
+                DateOnly dateonly = DateOnly.Parse(date);
+                return Ok(await _userApplication.GetResumenByIdAndDate(id, dateonly));
+            }
+            else
+                return Ok("Por favor ingresar formato 'dd-mm-yyyy' para la fecha");
+            
         }
 
         [HttpGet("{id}/goals")]
-        public IActionResult GetGoals(int id)
+        public async Task<IActionResult> GetGoals(int id)
         {
-            return Ok(_userRepository.getMetas(id));
+            return Ok(await _userApplication.GetMetasById(id));
         }
 
         [HttpGet("{id}/goals/{goalid}")]
-        public IActionResult GetGoals(int id, int goalid)
+        public async Task<IActionResult> GetGoals(int id, int goalid)
         {
-            return Ok(_userRepository.getMetaDetail(id, goalid));
+            return Ok(await _userApplication.GetMetaDetail(id, goalid));
         }
 
     }

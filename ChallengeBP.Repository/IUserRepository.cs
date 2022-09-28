@@ -11,10 +11,12 @@ namespace ChallengeBP.Repository
     public interface IUserRepository
     {
         Task<IEnumerable<User>> getUsers();
-        UserViewModel getUserById(int userid);
+        Task<User> GetUserById(int userid);
+        Task<List<AporteViewModel>> GetAportesById(int userid, int? goalid = null);
+        Task<List<BalanceViewModel>> GetBalanceById(int userid, int? goalid = null);
         ResumenViewModel getResumenById(int userid);
-        ResumenViewModel getResumenByIdAndDate(int userid, DateTime date);
-        List<MetaViewModel> getMetas(int userid);
+        Task<List<MetaViewModel>> getMetas(int userid, int? goalid = null);
         MetaViewModel getMetaDetail(int userid,int goalid);
+        List<BalanceViewModel> GetBalance(int userid);
     }
 }
