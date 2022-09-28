@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChallengeBP.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class usersController : ControllerBase
     {
@@ -26,14 +26,29 @@ namespace ChallengeBP.Controllers
             return Ok(_userRepository.getUserById(id));
         }
 
+        [HttpGet("{id}/summary")]
         public IActionResult GetResumen(int id)
         {
             return Ok(_userRepository.getResumenById(id));
         }
 
+        [HttpGet("{id}/summary/{dd-mm-yyyy}")]
         public IActionResult GetResumenDate(int id, DateTime date)
         {
             return Ok(_userRepository.getResumenByIdAndDate(id, date));
         }
+
+        [HttpGet("{id}/goals")]
+        public IActionResult GetGoals(int id)
+        {
+            return Ok(_userRepository.getMetas(id));
+        }
+
+        [HttpGet("{id}/goals/{goalid}")]
+        public IActionResult GetGoals(int id, int goalid)
+        {
+            return Ok(_userRepository.getMetaDetail(id, goalid));
+        }
+
     }
 }
