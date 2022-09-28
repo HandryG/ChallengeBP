@@ -8,6 +8,11 @@ Pasos para poder correr el proyecto:
 2. Una vez clonado el repositorio, asegurarse estar en el master
 3. Entrar a la carpeta ChallengeBP y abrir el ejecutable ChallengeBp.sln usando Visual Studio 2022
 4. Una vez abierto, en la barra superior cambiar el tipo de depuracion a IIS Express
+
 ![image](https://user-images.githubusercontent.com/38444402/192722393-57c81f04-4d31-4853-8900-193fc5281143.png)
+
 5. Ejecutar el IIS Express
 6. En caso se quiera visualizar el Swagger, en la URL del Web Service levantado, borrar el path : /swagger/index.html
+
+![image](https://user-images.githubusercontent.com/38444402/192722916-12ba7911-5a9e-4ab4-a3b5-7f8cdd4b23ed.png)
+
