@@ -14,6 +14,7 @@ namespace ChallengeBP.Repository
         UserViewModel getUserById(int userid);
         ResumenViewModel getResumenById(int userid);
         ResumenViewModel getResumenByIdAndDate(int userid, DateTime date);
-
+        List<MetaViewModel> getMetas(int userid);
+        MetaViewModel getMetaDetail(int userid,int goalid);
     }
 }
