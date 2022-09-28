@@ -49,8 +49,13 @@ namespace ChallengeBP.Repository
                                              where currencyindicator.Sourcecurrencyid == user.Currencyid && currencyindicator.Destinationcurrencyid == goaltransaction.Currencyid && currencyindicator.Date.Equals(goaltransaction.Date)
                                              select currencyindicator.Value).FirstOrDefault(),
                                    Fecha = goaltransaction.Date,
-                                   GoalId = goal.Id
+                                   GoalId = goal.Id,
+                                   Tipo = goaltransaction.Type
                                };
+
+            //Usar foreach para el cambio
+
+
 
             if (goalid != null)
                 listaAportes = listaAportes.Where(m => m.GoalId.Equals(goalid));
@@ -58,7 +63,7 @@ namespace ChallengeBP.Repository
             return await listaAportes.ToListAsync();
         }
 
-        public async Task<List<BalanceViewModel>> GetBalanceById(int userid)
+        public List<BalanceViewModel> GetBalance(int userid)
         {
             var balance = from goal in _context.Goals
                           join goaltransactionfunding in _context.Goaltransactionfundings on goal.Id equals goaltransactionfunding.Goalid
@@ -74,8 +79,38 @@ namespace ChallengeBP.Repository
                                         && currencyindicator.Date == goaltransactionfunding.Date
                                         select currencyindicator.Value).FirstOrDefault(),
                               Quotas = (double)goaltransactionfunding.Quotas,
-                              Fecha = goaltransactionfunding.Date
+                              Fecha = goaltransactionfunding.Date,
+                              FundingId = goaltransactionfunding.Fundingid,
+                              GoalId = goal.Id
                           };
+
+            return balance.ToList();
+        }
+
+        public async Task<List<BalanceViewModel>> GetBalanceById(int userid, int? goalid = null)
+        {
+            var balance = from goal in _context.Goals
+                          join goaltransactionfunding in _context.Goaltransactionfundings on goal.Id equals goaltransactionfunding.Goalid
+                          join user in _context.Users on goal.Userid equals user.Id
+                          where goal.Userid == userid
+                          select new BalanceViewModel
+                          {
+                              ShareValue =  (from fundingsharevalue in _context.Fundingsharevalues
+                                            where fundingsharevalue.Id == goaltransactionfunding.Fundingid && fundingsharevalue.Date.Equals(goaltransactionfunding.Date)
+                                            select fundingsharevalue.Value).FirstOrDefault(),
+                              Cambio = (from currencyindicator in _context.Currencyindicators
+                                        where currencyindicator.Sourcecurrencyid == user.Currencyid && currencyindicator.Destinationcurrencyid == (from goaltransaction in _context.Goaltransactions where goaltransaction.Id == goaltransactionfunding.Transactionid select goaltransaction.Currencyid).FirstOrDefault()
+                                        && currencyindicator.Date == goaltransactionfunding.Date
+                                        select currencyindicator.Value).FirstOrDefault(),
+                              Quotas = (double)goaltransactionfunding.Quotas,
+                              Fecha = goaltransactionfunding.Date,
+                              FundingId = goaltransactionfunding.Fundingid,
+                              GoalId = goal.Id
+                          };
+
+            if (goalid != null)
+                balance = balance.Where(m => m.GoalId.Equals(goalid));
+
             return await balance.ToListAsync();
         }
         
@@ -138,64 +173,7 @@ namespace ChallengeBP.Repository
             
 
         }
-        public ResumenViewModel getResumenByIdAndDate(int userid, DateTime date)
-        {
-            using (var db = _context)
-            {
-                var listaAportes = from goal in db.Goals
-                                   join goaltransaction in db.Goaltransactions on goal.Id equals goaltransaction.Goalid
-                                   join user in db.Users on goal.Userid equals user.Id
-                                   where goal.Userid == userid && goaltransaction.Date.Equals(date)
-                                   select new AporteViewModel
-                                   {
-                                       MontoOriginal = (double)goaltransaction.Amount,
-                                       Cambio = (from currencyindicator in db.Currencyindicators
-                                                 where currencyindicator.Sourcecurrencyid == user.Currencyid && currencyindicator.Destinationcurrencyid == goaltransaction.Currencyid && currencyindicator.Date == goaltransaction.Date
-                                                 select currencyindicator.Value).FirstOrDefault()
-                                   };
-
-                foreach (var item in listaAportes.Where(a => a.Cambio != 0))
-                {
-                    item.MontoFinal = item.MontoOriginal * item.Cambio;
-                }
-
-                foreach (var item in listaAportes.Where(a => a.Cambio == 0))
-                {
-                    item.MontoFinal = item.MontoOriginal;
-                }
-
-                var balance = from goal in db.Goals
-                              join goaltransactionfunding in db.Goaltransactionfundings on goal.Id equals goaltransactionfunding.Goalid
-                              join user in db.Users on goal.Userid equals user.Id
-                              where goal.Userid == userid && goaltransactionfunding.Date.Equals(date)
-                              select new BalanceViewModel
-                              {
-                                  ShareValue = (from fundingsharevalue in db.Fundingsharevalues
-                                                where fundingsharevalue.Id == goaltransactionfunding.Fundingid && fundingsharevalue.Date == goaltransactionfunding.Date
-                                                select fundingsharevalue.Value).FirstOrDefault(),
-                                  Cambio = (from currencyindicator in db.Currencyindicators
-                                            where currencyindicator.Sourcecurrencyid == user.Currencyid && currencyindicator.Destinationcurrencyid == (from goaltransaction in db.Goaltransactions where goaltransaction.Id == goaltransactionfunding.Transactionid select goaltransaction.Currencyid).FirstOrDefault()
-                                            && currencyindicator.Date == goaltransactionfunding.Date
-                                            select currencyindicator.Value).FirstOrDefault(),
-                                  Quotas = (double)goaltransactionfunding.Quotas
-                              };
-
-
-                foreach (var item in balance.Where(w => w.Cambio != 0))
-                {
-                    item.MontoFinal = item.Quotas * item.Cambio * item.ShareValue;
-                }
-
-                foreach (var item in balance.Where(w => w.Cambio == 0))
-                {
-                    item.MontoFinal = item.Quotas * item.Cambio;
-                }
-
-                return new ResumenViewModel(listaAportes.Sum(a => a.MontoFinal), balance.Sum(b => b.MontoFinal));
-            }
-
-        }
-
+        
         public async Task<List<MetaViewModel>> getMetas(int userid, int? goalid = null)
         {
             

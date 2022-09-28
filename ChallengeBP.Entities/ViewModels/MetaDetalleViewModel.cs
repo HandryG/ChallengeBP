@@ -18,6 +18,8 @@ namespace ChallengeBP.Entities.ViewModels
         public PortafolioViewModel Portafolio { get; set; }
         public DateTime FechaCreacion { get; set; }
         public double TotalAportes { get; set; }
+        public double TotalRetiros { get; set; }
+        public double PorcenajeCumplimiento { get; set; }
 
     }
 }
