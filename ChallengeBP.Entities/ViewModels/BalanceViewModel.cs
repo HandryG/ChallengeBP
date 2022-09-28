@@ -12,5 +12,6 @@ namespace ChallengeBP.Entities.ViewModels
         public double Quotas { get; set; }
         public double ShareValue { get; set; }
         public double MontoFinal { get; set; }
+        public DateOnly Fecha { get; set; }
     }
 }

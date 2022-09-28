@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChallengeBP.Entities", "Cha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChallengeBP.DataAccess", "ChallengeBP.DataAccess\ChallengeBP.DataAccess.csproj", "{7E7EEC34-AABB-4C7A-94EC-409227F905F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChallengeBP.Repository", "ChallengeBP.Repository\ChallengeBP.Repository.csproj", "{2CF084BB-2BDC-4784-8B08-FE1D57A60326}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChallengeBP.Repository", "ChallengeBP.Repository\ChallengeBP.Repository.csproj", "{2CF084BB-2BDC-4784-8B08-FE1D57A60326}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChallengeBP.Application", "ChallengeBP.Application\ChallengeBP.Application.csproj", "{C6160A96-7DE3-4120-9142-85567E1970F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{2CF084BB-2BDC-4784-8B08-FE1D57A60326}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CF084BB-2BDC-4784-8B08-FE1D57A60326}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CF084BB-2BDC-4784-8B08-FE1D57A60326}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6160A96-7DE3-4120-9142-85567E1970F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6160A96-7DE3-4120-9142-85567E1970F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6160A96-7DE3-4120-9142-85567E1970F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6160A96-7DE3-4120-9142-85567E1970F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

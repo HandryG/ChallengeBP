@@ -21,35 +21,64 @@ namespace ChallengeBP.Repository
                 var list = from user in db.Users
                            select user;
 
-                return await list.ToListAsync();
+                return await list.Take(20).ToListAsync();
             }
         }
 
-        public UserViewModel getUserById(int userid)
+        public async Task<User> GetUserById(int userid)
         {
-            using (var db = _context)
-            {
-                var userlinq = from user in db.Users
-                           where user.Id == userid
-                           select user;
+            
+                var userlinqasync = from user in _context.Users
+                                    where user.Id == userid
+                                    select user;
 
-                var usuario = userlinq.FirstOrDefault();
-
-                var advisorlinq = from user in db.Users
-                               where user.Id == usuario.Advisorid
-                               select user;
-
-                var advisor = advisorlinq.FirstOrDefault();
-
-                var userViewModel = new UserViewModel(usuario.Id,
-                                    usuario.Firstname + ' ' + usuario.Surname,
-                                    advisor.Firstname + ' ' + advisor.Surname,
-                                    usuario.Created);
-
-                return  userViewModel;
-            }
+                return await userlinqasync.FirstOrDefaultAsync();
+            
         }
 
+        public async Task<List<AporteViewModel>> GetAportesById(int userid, int? goalid = null)
+        {
+            var listaAportes = from goal in _context.Goals
+                               join goaltransaction in _context.Goaltransactions on goal.Id equals goaltransaction.Goalid
+                               join user in _context.Users on goal.Userid equals user.Id
+                               where goal.Userid == userid
+                               select new AporteViewModel
+                               {
+                                   MontoOriginal = (double)goaltransaction.Amount,
+                                   Cambio = (from currencyindicator in _context.Currencyindicators
+                                             where currencyindicator.Sourcecurrencyid == user.Currencyid && currencyindicator.Destinationcurrencyid == goaltransaction.Currencyid && currencyindicator.Date.Equals(goaltransaction.Date)
+                                             select currencyindicator.Value).FirstOrDefault(),
+                                   Fecha = goaltransaction.Date,
+                                   GoalId = goal.Id
+                               };
+
+            if (goalid != null)
+                listaAportes = listaAportes.Where(m => m.GoalId.Equals(goalid));
+
+            return await listaAportes.ToListAsync();
+        }
+
+        public async Task<List<BalanceViewModel>> GetBalanceById(int userid)
+        {
+            var balance = from goal in _context.Goals
+                          join goaltransactionfunding in _context.Goaltransactionfundings on goal.Id equals goaltransactionfunding.Goalid
+                          join user in _context.Users on goal.Userid equals user.Id
+                          where goal.Userid == userid
+                          select new BalanceViewModel
+                          {
+                              ShareValue = (from fundingsharevalue in _context.Fundingsharevalues
+                                            where fundingsharevalue.Id == goaltransactionfunding.Fundingid && fundingsharevalue.Date.Equals(goaltransactionfunding.Date)
+                                            select fundingsharevalue.Value).FirstOrDefault(),
+                              Cambio = (from currencyindicator in _context.Currencyindicators
+                                        where currencyindicator.Sourcecurrencyid == user.Currencyid && currencyindicator.Destinationcurrencyid == (from goaltransaction in _context.Goaltransactions where goaltransaction.Id == goaltransactionfunding.Transactionid select goaltransaction.Currencyid).FirstOrDefault()
+                                        && currencyindicator.Date == goaltransactionfunding.Date
+                                        select currencyindicator.Value).FirstOrDefault(),
+                              Quotas = (double)goaltransactionfunding.Quotas,
+                              Fecha = goaltransactionfunding.Date
+                          };
+            return await balance.ToListAsync();
+        }
+        
         public ResumenViewModel getResumenById(int userid)
         {
             using(var db = _context)
@@ -76,13 +105,14 @@ namespace ChallengeBP.Repository
 
                 var balance = from goal in db.Goals
                               join goaltransactionfunding in db.Goaltransactionfundings on goal.Id equals goaltransactionfunding.Goalid
+                              let sharevalue = (from fundingsharevalue in db.Fundingsharevalues
+                                                where fundingsharevalue.Id == goaltransactionfunding.Fundingid && fundingsharevalue.Date == goaltransactionfunding.Date
+                                                select fundingsharevalue.Value).Max()
                               join user in db.Users on goal.Userid equals user.Id
                               where goal.Userid == userid
                               select new BalanceViewModel
                               {
-                                  ShareValue = (from fundingsharevalue in db.Fundingsharevalues
-                                                where fundingsharevalue.Id == goaltransactionfunding.Fundingid && fundingsharevalue.Date == goaltransactionfunding.Date
-                                                select fundingsharevalue.Value).FirstOrDefault(),
+                                  ShareValue = sharevalue,
                                   Cambio = (from currencyindicator in db.Currencyindicators
                                             where currencyindicator.Sourcecurrencyid == user.Currencyid && currencyindicator.Destinationcurrencyid == (from goaltransaction in db.Goaltransactions where goaltransaction.Id == goaltransactionfunding.Transactionid select goaltransaction.Currencyid).FirstOrDefault()
                                             && currencyindicator.Date == goaltransactionfunding.Date
@@ -90,6 +120,7 @@ namespace ChallengeBP.Repository
                                   Quotas = (double)goaltransactionfunding.Quotas
                               };
 
+                var b = balance.ToList();
 
                 foreach (var item in balance.Where(w => w.Cambio != 0))
                 {
@@ -101,7 +132,7 @@ namespace ChallengeBP.Repository
                     item.MontoFinal = item.Quotas * item.Cambio;
                 }
 
-                return new ResumenViewModel { aportestotales = listaAportes.Sum(a => a.MontoFinal) , balance = balance.Sum(b => b.MontoFinal)};
+                return new ResumenViewModel(listaAportes.Sum(a => a.MontoFinal) , balance.Sum(b => b.MontoFinal));
             }
 
             
@@ -160,23 +191,23 @@ namespace ChallengeBP.Repository
                     item.MontoFinal = item.Quotas * item.Cambio;
                 }
 
-                return new ResumenViewModel { aportestotales = listaAportes.Sum(a => a.MontoFinal), balance = balance.Sum(b => b.MontoFinal) };
+                return new ResumenViewModel(listaAportes.Sum(a => a.MontoFinal), balance.Sum(b => b.MontoFinal));
             }
 
         }
 
-        public List<MetaViewModel> getMetas(int userid)
+        public async Task<List<MetaViewModel>> getMetas(int userid, int? goalid = null)
         {
-            using(var db = _context)
-            {
-                var listaMetas = from metas in db.Goals
-                                 join portafolio in db.Portfolios on metas.Portfolioid equals portafolio.Id
-                                 join riesgo in db.Risklevels on portafolio.Risklevelid equals riesgo.Id
-                                 join estrategiainversion in db.Investmentstrategies on portafolio.Investmentstrategyid equals estrategiainversion.Id
-                                 join entidadfinanciera in db.Financialentities on metas.Financialentityid equals entidadfinanciera.Id
+            
+                var listaMetas = from metas in _context.Goals
+                                 join portafolio in _context.Portfolios on metas.Portfolioid equals portafolio.Id
+                                 join riesgo in _context.Risklevels on portafolio.Risklevelid equals riesgo.Id
+                                 join estrategiainversion in _context.Investmentstrategies on portafolio.Investmentstrategyid equals estrategiainversion.Id
+                                 join entidadfinanciera in _context.Financialentities on metas.Financialentityid equals entidadfinanciera.Id
                                  where metas.Userid == userid
                                  select new MetaViewModel
                                  {
+                                     Id = metas.Id,
                                      Titulo = metas.Title,
                                      Years = metas.Years,
                                      InversionInicial = metas.Initialinvestment,
@@ -198,8 +229,11 @@ namespace ChallengeBP.Repository
                                      }
                                  };
 
-                return listaMetas.ToList();
-            }
+                if (goalid != null)
+                    listaMetas = listaMetas.Where(m => m.Id.Equals(goalid));
+                
+                return await listaMetas.ToListAsync();
+            
 
         }
 

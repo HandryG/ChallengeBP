@@ -10,14 +10,13 @@ namespace ChallengeBP.Entities.ViewModels
     {
         public int id { get; set; }
         public string nombrecompleto { get; set; }
-        public string nombrecompletoadvisor { get; set; }
+        public string? nombrecompletoadvisor { get; set; }
         public DateTime fechacreacion { get; set; }
 
-        public UserViewModel(int id, string nombrecompleto, string nombrecompletoadvisor, DateTime fechacreacion)
+        public UserViewModel(int id, string nombrecompleto, DateTime fechacreacion)
         {
             this.id = id;
             this.nombrecompleto = nombrecompleto;
-            this.nombrecompletoadvisor = nombrecompletoadvisor;
             this.fechacreacion = fechacreacion;
         }
     }

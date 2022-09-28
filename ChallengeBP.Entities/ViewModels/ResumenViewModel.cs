@@ -11,5 +11,10 @@ namespace ChallengeBP.Entities.ViewModels
         public double aportestotales { get; set; }
         public double balance { get; set; }
 
+        public ResumenViewModel(double aportestotales, double balance)
+        {
+            this.aportestotales = aportestotales;
+            this.balance = balance;
+        }
     }
 }
